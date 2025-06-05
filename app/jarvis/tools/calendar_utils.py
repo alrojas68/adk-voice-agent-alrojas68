@@ -10,7 +10,6 @@ from googleapiclient.discovery import build
 
 # Google API scopes for calendar access
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
-CALENDAR_EMAIL = "alrojas68@gmail.com"
 
 
 def get_calendar_service():
@@ -27,14 +26,10 @@ def get_calendar_service():
         creds_dict = json.loads(credentials_json)
         creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
         service = build("calendar", "v3", credentials=creds)
-        
-        # Set the calendar ID to the specific email
-        calendar_id = CALENDAR_EMAIL
-        
-        return service, calendar_id
+        return service
     except Exception as e:
         print(f"Error loading calendar credentials: {e}")
-        return None, None
+        return None
 
 
 def format_event_time(event_time: dict) -> str:

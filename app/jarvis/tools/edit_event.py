@@ -2,45 +2,39 @@
 Edit event tool for Google Calendar integration.
 """
 
-import datetime
-from typing import Optional
-
 from .calendar_utils import get_calendar_service, parse_datetime
 
 
 def edit_event(
     event_id: str,
-    summary: Optional[str] = None,
-    start_time: Optional[str] = None,
-    end_time: Optional[str] = None,
-    description: Optional[str] = None,
-    location: Optional[str] = None,
-    attendees: Optional[list[str]] = None,
+    summary: str,
+    start_time: str,
+    end_time: str,
 ) -> dict:
     """
-    Edit an existing calendar event.
+    Edit an existing event in Google Calendar - change title and/or reschedule.
 
     Args:
-        event_id (str): ID of the event to edit
-        summary (str, optional): New event title
-        start_time (str, optional): New start time
-        end_time (str, optional): New end time
-        description (str, optional): New event description
-        location (str, optional): New event location
-        attendees (list[str], optional): New list of attendee email addresses
+        event_id (str): The ID of the event to edit
+        summary (str): New title/summary for the event (pass empty string to keep unchanged)
+        start_time (str): New start time (e.g., "2023-12-31 14:00", pass empty string to keep unchanged)
+        end_time (str): New end time (e.g., "2023-12-31 15:00", pass empty string to keep unchanged)
 
     Returns:
         dict: Information about the edited event or error details
     """
     try:
         # Get calendar service
-        service, calendar_id = get_calendar_service()
-        if not service or not calendar_id:
+        service = get_calendar_service()
+        if not service:
             return {
                 "status": "error",
                 "message": "Failed to authenticate with Google Calendar. Please check credentials.",
-                "event": None,
             }
+
+        # Always use primary calendar
+        calendar_id = "alrojas68@gmail.com"
+
 
         # First get the existing event
         try:

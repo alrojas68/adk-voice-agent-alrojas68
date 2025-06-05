@@ -5,24 +5,39 @@ Delete event tool for Google Calendar integration.
 from .calendar_utils import get_calendar_service
 
 
-def delete_event(event_id: str) -> dict:
+def delete_event(
+    event_id: str,
+    confirm: bool,
+) -> dict:
     """
-    Delete a calendar event.
+    Delete an event from Google Calendar.
 
     Args:
-        event_id (str): ID of the event to delete
+        event_id (str): The unique ID of the event to delete
+        confirm (bool): Confirmation flag (must be set to True to delete)
 
     Returns:
-        dict: Status of the deletion operation
+        dict: Operation status and details
     """
+    # Safety check - require explicit confirmation
+    if not confirm:
+        return {
+            "status": "error",
+            "message": "Please confirm deletion by setting confirm=True",
+        }
+
     try:
         # Get calendar service
-        service, calendar_id = get_calendar_service()
-        if not service or not calendar_id:
+        service = get_calendar_service()
+        if not service:
             return {
                 "status": "error",
                 "message": "Failed to authenticate with Google Calendar. Please check credentials.",
             }
+
+        # Always use primary calendar
+        calendar_id = "alrojas68@gmail.com"
+
 
         # Call the Calendar API to delete the event
         service.events().delete(calendarId=calendar_id, eventId=event_id).execute()

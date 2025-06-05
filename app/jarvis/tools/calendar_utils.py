@@ -5,62 +5,65 @@ Utility functions for Google Calendar integration.
 import json
 import os
 from datetime import datetime
-
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
-# Define scopes needed for Google Calendar
+# Google API scopes for calendar access
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
+CALENDAR_EMAIL = "alrojas68@gmail.com"
 
 
 def get_calendar_service():
     """
     Authenticate and create a Google Calendar service object using
-    service account credentials from an environment variable.
+    service account credentials loaded from the environment variable.
 
     Returns:
-        A Google Calendar service object or None if authentication fails
+        Google Calendar API service instance or None if authentication fails
     """
     try:
+        # Load the service account credentials from an env var (Railway Secret)
         credentials_json = os.environ["GOOGLE_CREDENTIALS_JSON"]
         creds_dict = json.loads(credentials_json)
         creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
         service = build("calendar", "v3", credentials=creds)
-        return service
+        
+        # Set the calendar ID to the specific email
+        calendar_id = CALENDAR_EMAIL
+        
+        return service, calendar_id
     except Exception as e:
         print(f"Error loading calendar credentials: {e}")
-        return None
+        return None, None
 
 
-def format_event_time(event_time):
+def format_event_time(event_time: dict) -> str:
     """
-    Format an event time into a human-readable string.
+    Format a Google Calendar event time into a human-readable string.
 
     Args:
-        event_time (dict): The event time dictionary from Google Calendar API
+        event_time: dict from Google Calendar API (either date or dateTime)
 
     Returns:
-        str: A human-readable time string
+        Formatted time string
     """
     if "dateTime" in event_time:
-        # This is a datetime event
         dt = datetime.fromisoformat(event_time["dateTime"].replace("Z", "+00:00"))
         return dt.strftime("%Y-%m-%d %I:%M %p")
     elif "date" in event_time:
-        # This is an all-day event
         return f"{event_time['date']} (All day)"
     return "Unknown time format"
 
 
-def parse_datetime(datetime_str):
+def parse_datetime(datetime_str: str) -> datetime | None:
     """
-    Parse a datetime string into a datetime object.
+    Try to parse a datetime string into a datetime object.
 
     Args:
-        datetime_str (str): A string representing a date and time
+        datetime_str: Input string with date and time
 
     Returns:
-        datetime: A datetime object or None if parsing fails
+        datetime object or None if parsing fails
     """
     formats = [
         "%Y-%m-%d %H:%M",
@@ -85,14 +88,13 @@ def parse_datetime(datetime_str):
 
 def get_current_time() -> dict:
     """
-    Get the current time and date
+    Get the current time and formatted date.
+
+    Returns:
+        Dictionary with current_time and formatted_date keys
     """
     now = datetime.now()
-
-    # Format date as MM-DD-YYYY
-    formatted_date = now.strftime("%m-%d-%Y")
-
     return {
         "current_time": now.strftime("%Y-%m-%d %H:%M:%S"),
-        "formatted_date": formatted_date,
+        "formatted_date": now.strftime("%m-%d-%Y"),
     }

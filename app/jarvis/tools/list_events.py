@@ -26,8 +26,8 @@ def list_events(
         print("Start date: ", start_date)
         print("Days: ", days)
         # Get calendar service
-        service = get_calendar_service()
-        if not service:
+        service, calendar_id = get_calendar_service()
+        if not service or not calendar_id:
             return {
                 "status": "error",
                 "message": "Failed to authenticate with Google Calendar. Please check credentials.",
@@ -36,10 +36,6 @@ def list_events(
 
         # Always use a large max_results value to return all events
         max_results = 100
-
-        # Always use primary calendar
-        calendar_id = "alrojas68@gmail.com"
-
 
         # Set time range
         if not start_date or start_date.strip() == "":

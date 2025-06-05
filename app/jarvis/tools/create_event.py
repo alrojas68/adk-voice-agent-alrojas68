@@ -3,35 +3,40 @@ Create event tool for Google Calendar integration.
 """
 
 import datetime
+from typing import Optional
 from .calendar_utils import get_calendar_service, parse_datetime
 
 def create_event(
     summary: str,
     start_time: str,
     end_time: str,
+    description: Optional[str] = None,
+    location: Optional[str] = None,
+    attendees: Optional[list[str]] = None,
 ) -> dict:
     """
-    Create a new event in Google Calendar.
+    Create a new calendar event.
 
     Args:
-        summary (str): Event title/summary
-        start_time (str): Start time (e.g., "2023-12-31 14:00")
-        end_time (str): End time (e.g., "2023-12-31 15:00")
+        summary (str): Event title
+        start_time (str): Start time in a format that can be parsed
+        end_time (str): End time in a format that can be parsed
+        description (str, optional): Event description
+        location (str, optional): Event location
+        attendees (list[str], optional): List of attendee email addresses
 
     Returns:
         dict: Information about the created event or error details
     """
     try:
         # Get calendar service
-        service = get_calendar_service()
-        if not service:
+        service, calendar_id = get_calendar_service()
+        if not service or not calendar_id:
             return {
                 "status": "error",
                 "message": "Failed to authenticate with Google Calendar. Please check credentials.",
+                "event": None,
             }
-
-        # Use your personal calendar instead of the service account's "primary"
-        calendar_id = "alrojas68@gmail.com"
 
         # Parse times
         start_dt = parse_datetime(start_time)

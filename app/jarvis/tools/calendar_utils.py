@@ -5,60 +5,78 @@ Utility functions for Google Calendar integration.
 import json
 import os
 from datetime import datetime
-from google.oauth2.service_account import Credentials
+from pathlib import Path
+
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-# Google API scopes for calendar access
+# Define scopes needed for Google Calendar
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
+
+# Path for token storage
+TOKEN_PATH = Path(os.path.expanduser("~/.credentials/calendar_token.json"))
+CREDENTIALS_PATH = Path("credentials.json")
 
 
 def get_calendar_service():
     """
-    Authenticate and create a Google Calendar service object using
-    service account credentials loaded from the environment variable.
-
-    Returns:
-        Google Calendar API service instance or None if authentication fails
+    Authenticate using a Google Service Account stored in an environment variable
+    (ideal for Railway or server deployments).
     """
+    from google.oauth2 import service_account
+
+    service_account_json = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+
+    if not service_account_json:
+        print("Error: Missing GOOGLE_SERVICE_ACCOUNT_JSON environment variable.")
+        return None
+
     try:
-        # Load the service account credentials from an env var (Railway Secret)
-        credentials_json = os.environ["GOOGLE_CREDENTIALS_JSON"]
-        creds_dict = json.loads(credentials_json)
-        creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
-        service = build("calendar", "v3", credentials=creds)
-        return service
+        service_account_info = json.loads(service_account_json)
+
+        credentials = service_account.Credentials.from_service_account_info(
+            service_account_info, scopes=SCOPES
+        )
+
+        return build("calendar", "v3", credentials=credentials)
+
     except Exception as e:
-        print(f"Error loading calendar credentials: {e}")
+        print(f"Error initializing Google Calendar service: {e}")
         return None
 
 
-def format_event_time(event_time: dict) -> str:
+
+def format_event_time(event_time):
     """
-    Format a Google Calendar event time into a human-readable string.
+    Format an event time into a human-readable string.
 
     Args:
-        event_time: dict from Google Calendar API (either date or dateTime)
+        event_time (dict): The event time dictionary from Google Calendar API
 
     Returns:
-        Formatted time string
+        str: A human-readable time string
     """
     if "dateTime" in event_time:
+        # This is a datetime event
         dt = datetime.fromisoformat(event_time["dateTime"].replace("Z", "+00:00"))
         return dt.strftime("%Y-%m-%d %I:%M %p")
     elif "date" in event_time:
+        # This is an all-day event
         return f"{event_time['date']} (All day)"
     return "Unknown time format"
 
 
-def parse_datetime(datetime_str: str) -> datetime | None:
+def parse_datetime(datetime_str):
     """
-    Try to parse a datetime string into a datetime object.
+    Parse a datetime string into a datetime object.
 
     Args:
-        datetime_str: Input string with date and time
+        datetime_str (str): A string representing a date and time
 
     Returns:
-        datetime object or None if parsing fails
+        datetime: A datetime object or None if parsing fails
     """
     formats = [
         "%Y-%m-%d %H:%M",
@@ -83,13 +101,14 @@ def parse_datetime(datetime_str: str) -> datetime | None:
 
 def get_current_time() -> dict:
     """
-    Get the current time and formatted date.
-
-    Returns:
-        Dictionary with current_time and formatted_date keys
+    Get the current time and date
     """
     now = datetime.now()
+
+    # Format date as MM-DD-YYYY
+    formatted_date = now.strftime("%m-%d-%Y")
+
     return {
         "current_time": now.strftime("%Y-%m-%d %H:%M:%S"),
-        "formatted_date": now.strftime("%m-%d-%Y"),
+        "formatted_date": formatted_date,
     }

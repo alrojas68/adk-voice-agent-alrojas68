@@ -38,8 +38,7 @@ def list_events(
         max_results = 100
 
         # Always use primary calendar
-        calendar_id = "alrojas68@gmail.com"
-
+        calendar_id = "primary"
 
         # Set time range
         if not start_date or start_date.strip() == "":

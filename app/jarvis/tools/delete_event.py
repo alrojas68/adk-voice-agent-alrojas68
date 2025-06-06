@@ -36,7 +36,7 @@ def delete_event(
             }
 
         # Always use primary calendar
-        calendar_id = "primary"
+        calendar_id = "alrojas68@gmail.com"
 
         # Call the Calendar API to delete the event
         service.events().delete(calendarId=calendar_id, eventId=event_id).execute()

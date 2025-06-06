@@ -38,7 +38,7 @@ def list_events(
         max_results = 100
 
         # Always use primary calendar
-        calendar_id = "primary"
+        calendar_id = "alrojas68@gmail.com"
 
         # Set time range
         if not start_date or start_date.strip() == "":
@@ -116,4 +116,4 @@ def list_events(
             "status": "error",
             "message": f"Error fetching events: {str(e)}",
             "events": [],
-        }
+            }

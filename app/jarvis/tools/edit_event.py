@@ -33,7 +33,7 @@ def edit_event(
             }
 
         # Always use primary calendar
-        calendar_id = "primary"
+        calendar_id = "alrojas68@gmail.com"
 
         # First get the existing event
         try:

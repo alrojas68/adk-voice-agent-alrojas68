@@ -34,7 +34,7 @@ def create_event(
             }
 
         # Always use primary calendar
-        calendar_id = "primary"
+        calendar_id = "alrojas68@gmail.com"
 
         # Parse times
         start_dt = parse_datetime(start_time)

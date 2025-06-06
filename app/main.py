@@ -51,7 +51,6 @@ def start_agent_session(session_id, is_audio=False):
     # Create speech config with voice settings
     speech_config = types.SpeechConfig(
         voice_config=types.VoiceConfig(
-            # Puck, Charon, Kore, Fenrir, Aoede, Leda, Orus, and Zephyr
             prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name="Puck")
         )
     )
@@ -59,7 +58,6 @@ def start_agent_session(session_id, is_audio=False):
     # Create run config with basic settings
     config = {"response_modalities": [modality], "speech_config": speech_config}
 
-    # Add output_audio_transcription when audio is enabled to get both audio and text
     if is_audio:
         config["output_audio_transcription"] = {}
 
@@ -86,7 +84,6 @@ async def agent_to_client_messaging(
             if event is None:
                 continue
 
-            # If the turn complete or interrupted, send it
             if event.turn_complete or event.interrupted:
                 message = {
                     "turn_complete": event.turn_complete,
@@ -96,17 +93,13 @@ async def agent_to_client_messaging(
                 print(f"[AGENT TO CLIENT]: {message}")
                 continue
 
-            # Read the Content and its first Part
             part = event.content and event.content.parts and event.content.parts[0]
             if not part:
                 continue
 
-            # Make sure we have a valid Part
             if not isinstance(part, types.Part):
                 continue
 
-            # Only send text if it's a partial response (streaming)
-            # Skip the final complete message to avoid duplication
             if part.text and event.partial:
                 message = {
                     "mime_type": "text/plain",
@@ -116,7 +109,6 @@ async def agent_to_client_messaging(
                 await websocket.send_text(json.dumps(message))
                 print(f"[AGENT TO CLIENT]: text/plain: {part.text}")
 
-            # If it's audio, send Base64 encoded audio data
             is_audio = (
                 part.inline_data
                 and part.inline_data.mime_type
@@ -139,31 +131,22 @@ async def client_to_agent_messaging(
 ):
     """Client to agent communication"""
     while True:
-        # Decode JSON message
         message_json = await websocket.receive_text()
         message = json.loads(message_json)
         mime_type = message["mime_type"]
         data = message["data"]
-        role = message.get("role", "user")  # Default to 'user' if role is not provided
+        role = message.get("role", "user")
 
-        # Send the message to the agent
         if mime_type == "text/plain":
-            # Send a text message
             content = types.Content(role=role, parts=[types.Part.from_text(text=data)])
             live_request_queue.send_content(content=content)
             print(f"[CLIENT TO AGENT PRINT]: {data}")
         elif mime_type == "audio/pcm":
-            # Send audio data
             decoded_data = base64.b64decode(data)
-
-            # Send the audio data - note that ActivityStart/End and transcription
-            # handling is done automatically by the ADK when input_audio_transcription
-            # is enabled in the config
             live_request_queue.send_realtime(
                 types.Blob(data=decoded_data, mime_type=mime_type)
             )
             print(f"[CLIENT TO AGENT]: audio/pcm: {len(decoded_data)} bytes")
-
         else:
             raise ValueError(f"Mime type not supported: {mime_type}")
 
@@ -174,14 +157,19 @@ async def client_to_agent_messaging(
 
 app = FastAPI()
 
+# Manejo seguro del directorio estático
 STATIC_DIR = Path("static")
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+if STATIC_DIR.exists() and STATIC_DIR.is_dir():
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 @app.get("/")
 async def root():
     """Serves the index.html"""
-    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+    index_path = STATIC_DIR / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
+    return {"message": "index.html no encontrado en /static"}
 
 
 @app.websocket("/ws/{session_id}")
@@ -192,16 +180,13 @@ async def websocket_endpoint(
 ):
     """Client websocket endpoint"""
 
-    # Wait for client connection
     await websocket.accept()
     print(f"Client #{session_id} connected, audio mode: {is_audio}")
 
-    # Start agent session
     live_events, live_request_queue = start_agent_session(
         session_id, is_audio == "true"
     )
 
-    # Start tasks
     agent_to_client_task = asyncio.create_task(
         agent_to_client_messaging(websocket, live_events)
     )
@@ -210,5 +195,4 @@ async def websocket_endpoint(
     )
     await asyncio.gather(agent_to_client_task, client_to_agent_task)
 
-    # Disconnected
     print(f"Client #{session_id} disconnected")

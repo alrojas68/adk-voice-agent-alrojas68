@@ -47,7 +47,7 @@ def create_event(
             }
 
         # Dynamically determine timezone
-        timezone_id = "America/New_York"  # Default to Eastern Time
+        timezone_id = "America/Mexico_City"  # Default to Eastern Time
 
         try:
             # Try to get the timezone from the calendar settings

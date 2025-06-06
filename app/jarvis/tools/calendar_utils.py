@@ -4,8 +4,10 @@ Utility functions for Google Calendar integration.
 
 import json
 import os
+
 from datetime import datetime
 from pathlib import Path
+
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -105,8 +107,8 @@ def get_current_time() -> dict:
     """
     now = datetime.now()
 
-    # Format date as MM-DD-YYYY
-    formatted_date = now.strftime("%m-%d-%Y")
+    # Format date as DD-MM-YYYY
+    formatted_date = now.strftime("%d-%m-%Y")
 
     return {
         "current_time": now.strftime("%Y-%m-%d %H:%M:%S"),

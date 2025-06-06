@@ -51,7 +51,7 @@ def edit_event(
             event["summary"] = summary
 
         # Get timezone from the original event
-        timezone_id = "America/New_York"  # Default
+        timezone_id = "America/Mexico_City"  # Default
         if "start" in event and "timeZone" in event["start"]:
             timezone_id = event["start"]["timeZone"]
 

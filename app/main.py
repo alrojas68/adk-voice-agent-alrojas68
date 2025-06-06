@@ -154,11 +154,12 @@ async def client_to_agent_messaging(
 #
 # FastAPI web app
 #
+from pathlib import Path
 
 app = FastAPI()
 
-# Manejo seguro del directorio estático
-STATIC_DIR = Path("static")
+# Asegúrate de apuntar al directorio correcto: app/static/
+STATIC_DIR = Path(__file__).parent / "static"
 if STATIC_DIR.exists() and STATIC_DIR.is_dir():
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 

@@ -3,7 +3,10 @@ Create event tool for Google Calendar integration.
 """
 
 import datetime
+
 from .calendar_utils import get_calendar_service, parse_datetime
+
+
 
 def create_event(
     summary: str,
@@ -30,8 +33,8 @@ def create_event(
                 "message": "Failed to authenticate with Google Calendar. Please check credentials.",
             }
 
-        # Use your personal calendar instead of the service account's "primary"
-        calendar_id = "alrojas68@gmail.com"
+        # Always use primary calendar
+        calendar_id = "primary"
 
         # Parse times
         start_dt = parse_datetime(start_time)
@@ -43,32 +46,37 @@ def create_event(
                 "message": "Invalid date/time format. Please use YYYY-MM-DD HH:MM format.",
             }
 
-        # Determine timezone
-        timezone_id = "America/New_York"
+        # Dynamically determine timezone
+        timezone_id = "America/New_York"  # Default to Eastern Time
+
         try:
+            # Try to get the timezone from the calendar settings
             settings = service.settings().list().execute()
             for setting in settings.get("items", []):
                 if setting.get("id") == "timezone":
                     timezone_id = setting.get("value")
                     break
         except Exception:
+            # If we can't get it from settings, we'll use the default
             pass
 
-        # Create event body
-        event_body = {
-            "summary": summary,
-            "start": {
-                "dateTime": start_dt.isoformat(),
-                "timeZone": timezone_id,
-            },
-            "end": {
-                "dateTime": end_dt.isoformat(),
-                "timeZone": timezone_id,
-            },
-        }
+        # Create event body without type annotations
+        event_body = {}
 
-        # Insert event into your calendar
-        event = service.events().insert(calendarId=calendar_id, body=event_body).execute()
+        # Add summary
+        event_body["summary"] = summary
+
+        # Add start and end times with the dynamically determined timezone
+        event_body["start"] = {
+            "dateTime": start_dt.isoformat(),
+            "timeZone": timezone_id,
+        }
+        event_body["end"] = {"dateTime": end_dt.isoformat(), "timeZone": timezone_id}
+
+        # Call the Calendar API to create the event
+        event = (
+            service.events().insert(calendarId=calendar_id, body=event_body).execute()
+        )
 
         return {
             "status": "success",

@@ -27,7 +27,7 @@ def delete_event(
         }
 
     try:
-        # Get calendar service
+        # Get calendar service # Authenticate using service account via GOOGLE_SERVICE_ACCOUNT_JSON
         service = get_calendar_service()
         if not service:
             return {
@@ -36,8 +36,7 @@ def delete_event(
             }
 
         # Always use primary calendar
-        calendar_id = "alrojas68@gmail.com"
-
+        calendar_id = "primary"
 
         # Call the Calendar API to delete the event
         service.events().delete(calendarId=calendar_id, eventId=event_id).execute()

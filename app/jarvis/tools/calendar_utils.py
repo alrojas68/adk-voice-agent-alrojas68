@@ -7,7 +7,7 @@ import os
 
 from datetime import datetime
 from pathlib import Path
-
+from zoneinfo import ZoneInfo
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -103,9 +103,9 @@ def parse_datetime(datetime_str):
 
 def get_current_time() -> dict:
     """
-    Get the current time and date
+    Get the current time and date in America/Mexico_City timezone
     """
-    now = datetime.now()
+    now = datetime.now(ZoneInfo("America/Mexico_City"))
 
     # Format date as DD-MM-YYYY
     formatted_date = now.strftime("%d-%m-%Y")

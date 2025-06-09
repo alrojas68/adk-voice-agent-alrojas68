@@ -48,17 +48,17 @@ def create_event(
 
         # Dynamically determine timezone
         timezone_id = "America/Mexico_City"  # Default to Eastern Time
-
-        try:
-            # Try to get the timezone from the calendar settings
-            settings = service.settings().list().execute()
-            for setting in settings.get("items", []):
-                if setting.get("id") == "timezone":
-                    timezone_id = setting.get("value")
-                    break
-        except Exception:
-            # If we can't get it from settings, we'll use the default
-            pass
+        
+        # try:
+        #     # Try to get the timezone from the calendar settings
+        #     settings = service.settings().list().execute()
+        #     for setting in settings.get("items", []):
+        #         if setting.get("id") == "timezone":
+        #             timezone_id = setting.get("value")
+        #             break
+        # except Exception:
+        #     # If we can't get it from settings, we'll use the default
+        #     pass
 
         # Create event body without type annotations
         event_body = {}

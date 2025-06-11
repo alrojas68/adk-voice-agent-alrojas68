@@ -1,4 +1,12 @@
 from google.adk.agents import Agent
+from google.adk.agents.callback_context import CallbackContext
+
+def before_tool_call(callback_context: CallbackContext) -> Optional[types.Content]:
+    get_current_time() 
+    return None
+
+
+
 
 # from google.adk.tools import google_search  # Import the search tool
 from .tools import (
@@ -64,7 +72,7 @@ root_agent = Agent(
 
    
     """,
-    before_tool_call=get_current_time, ## here call back... 
+    before_tool_callback=before_tool_call, ## here call back... 
     tools=[
         list_events,
         create_event,

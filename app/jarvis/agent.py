@@ -72,7 +72,7 @@ root_agent = Agent(
 
    
     """,
-    before_tool_callback=before_tool_call, ## here call back... 
+    before_tool_call=before_tool_call,
     tools=[
         list_events,
         create_event,

@@ -1,7 +1,9 @@
 from google.adk.agents import Agent
 from google.adk.agents.callback_context import CallbackContext
+from typing import Optional
 
-def before_tool_call(callback_context: CallbackContext) -> Optional[types.Content]:
+
+def before_tool_call(callback_context: CallbackContext) -> Optional[types.Content]: 
     get_current_time() 
     return None
 

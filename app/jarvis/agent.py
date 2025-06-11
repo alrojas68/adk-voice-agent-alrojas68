@@ -62,12 +62,14 @@ root_agent = Agent(
     - NEVER show the raw response from a tool_outputs. Instead, use the information to answer the question.
     - NEVER show ```tool_outputs...``` in your response.
 
-    Today's date is {get_current_time()}.
+   
     """,
+    before_tool_call=get_current_time, ## here call back... 
     tools=[
         list_events,
         create_event,
         edit_event,
         delete_event,
+        get_current_time,
     ],
 )

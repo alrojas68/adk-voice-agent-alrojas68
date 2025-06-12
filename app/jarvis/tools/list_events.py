@@ -117,14 +117,3 @@ def list_events(
             "message": f"Error fetching events: {str(e)}",
             "events": [],
             }
-
-def list_events_multiple_calendars(start_date, days, calendar_ids):
-    all_events = []
-    for calendar_id in calendar_ids:
-        result = list_events(start_date, days, calendar_id=calendar_id)
-        all_events.extend(result["events"])
-    return all_events
-
-all_events = list_events_multiple_calendars(
-    "2024-06-05", 7, ["alrojas68@gmail.com", "family1234567890@group.calendar.google.com"]
-)

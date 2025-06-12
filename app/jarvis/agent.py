@@ -3,10 +3,10 @@ from google.adk.agents.callback_context import CallbackContext
 from typing import Optional
 
 
-def before_tool_call(callback_context: CallbackContext):
+def before_agent_callback(callback_context: CallbackContext) -> Optional[None]:
     current_time = get_current_time()
-    # Puedes guardar esto en el contexto si el framework lo permite
-    callback_context.some_property = current_time
+    if hasattr(callback_context, "state"):
+        callback_context.state["current_time"] = current_time
     return None
 
 
@@ -76,7 +76,8 @@ root_agent = Agent(
 
    
     """,
-    before_tool_call=before_tool_call,
+    before_agent_callback=before_agent_callback,
+    
     tools=[
         list_events,
         create_event,
